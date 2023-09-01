@@ -818,6 +818,7 @@ def EfficientNetV2(
     stride_size=2,
     classifier_activation="softmax",
     include_preprocessing=True,
+    raw_input=False,
     **kwargs,
 ):
     """Instantiates the EfficientNetV2 architecture using given scaling coefficients.
@@ -856,6 +857,7 @@ def EfficientNetV2(
           `classifier_activation=None` to return the logits of the `"top"` layer.
         include_preprocessing: Boolean, whether to include the preprocessing layer
           (`Rescaling`) at the bottom of the network. Defaults to `True`.
+        raw_input: Boolean, whether to skip rescaling of input data. Defaults to `True`.
 
       Returns:
         A `keras.Model` instance.
@@ -922,14 +924,16 @@ def EfficientNetV2(
         # if number of channels allows it
         num_channels = input_shape[-1]
         if model_name.split("-")[-1].startswith("b") and num_channels == 3:
-            x = layers.Rescaling(scale=1. / 255)(x)
+            if not raw_input:
+                x = layers.Rescaling(scale=1. / 255)(x)
             x = layers.Normalization(
                 mean=[0.485, 0.456, 0.406],
                 variance=[0.229 ** 2, 0.224 ** 2, 0.225 ** 2],
                 axis=bn_axis,
             )(x)
         else:
-            x = layers.Rescaling(scale=1. / 128.0, offset=-1)(x)
+            if not raw_input:
+                x = layers.Rescaling(scale=1. / 128.0, offset=-1)(x)
 
     # Build stem
     stem_filters = round_filters(

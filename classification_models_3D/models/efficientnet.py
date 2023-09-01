@@ -228,6 +228,8 @@ def EfficientNet(
         classes=1000,
         stride_size=2,
         classifier_activation='softmax',
+        include_preprocessing=True,
+        raw_input=False,
         **kwargs,
 ):
     """Instantiates the EfficientNet architecture using given scaling coefficients.
@@ -270,6 +272,9 @@ def EfficientNet(
         classifier_activation: A `str` or callable. The activation function to use
             on the "top" layer. Ignored unless `include_top=True`. Set
             `classifier_activation=None` to return the logits of the "top" layer.
+        include_preprocessing: Boolean, whether to include the preprocessing layer
+          (`Rescaling`) at the bottom of the network. Defaults to `True`.
+        raw_input: Boolean, whether to skip rescaling of input data. Defaults to `True`.
 
       Returns:
         A `keras.Model` instance.
@@ -342,7 +347,8 @@ def EfficientNet(
 
     # Build stem
     x = img_input
-    x = layers.Rescaling(1. / 255.)(x)
+    if not raw_input:
+        x = layers.Rescaling(1. / 255.)(x)
     x = layers.Normalization(axis=bn_axis)(x)
 
     x = layers.ZeroPadding3D(
