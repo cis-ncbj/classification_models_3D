@@ -63,7 +63,7 @@ def sphere(shape, radius, position):
     n = len(shape)
     semisizes = (radius,) * len(shape)
 
-    # genereate the grid for the support points
+    # generate the grid for the support points
     # centered at the position indicated by position
     grid = [slice(-x0, dim - x0) for x0, dim in zip(position, shape)]
     position = np.ogrid[grid]
